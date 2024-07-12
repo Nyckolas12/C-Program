@@ -7,6 +7,10 @@
 #include "Particle.h"
 #include "Random.h"
 #include "ETime.h"
+#include "MathUtils.h"
+#include "Model.h"
+#include "Transform.h"
+#include <fmod.h>
 using namespace std;
 
 
@@ -19,6 +23,31 @@ int main(int argc, char* argv[])
 	Input input;
 	input.Initialize();
 	Time time;
+
+	// create audio system
+	FMOD::System* audio;
+	FMOD::System_Create(&audio);
+
+	void* extradriverdata = nullptr;
+	audio->init(32, FMOD_INIT_NORMAL, extradriverdata);
+
+
+	FMOD::Sound* sound = nullptr;
+	audio->createSound("test.wav", FMOD_DEFAULT, 0, &sound);
+
+	audio->playSound(sound, 0, false, nullptr);
+
+	vector<FMOD::Sound*> sounds;
+	audio->createSound("bass.wav", FMOD_DEFAULT, 0, &sound);
+	sounds.push_back(sound);
+	
+	audio->createSound("snare.wav", FMOD_DEFAULT, 0, &sound);
+	sounds.push_back(sound);
+	
+	audio->createSound("open-hat.wav", FMOD_DEFAULT, 0, &sound);
+	sounds.push_back(sound);
+
+
 
 
 	vector<Particle> particles;
@@ -36,6 +65,39 @@ int main(int argc, char* argv[])
 			points.push_back(Vector2{ rand() % 800, rand() % 600 });
 		}*/
 
+
+	float offset = 0;
+	//vector<Vector2> points;
+	/*points.push_back(Vector2{ 5,0 });
+	points.push_back(Vector2{ -5,-5 });
+	points.push_back(Vector2{ -5,5 });
+	points.push_back(Vector2{ 5,0 });*/
+
+	// Body
+	points.push_back(Vector2{ 0, 0 });
+	points.push_back(Vector2{ 10, 0 });
+	points.push_back(Vector2{ 10, -5 });
+	points.push_back(Vector2{ 0, -5 });
+	points.push_back(Vector2{ 0, 0 });
+
+	// Head
+	points.push_back(Vector2{ 10, 0 });
+	points.push_back(Vector2{ 15, 5 });
+	points.push_back(Vector2{ 15, -5 });
+	points.push_back(Vector2{ 10, -5 });
+	points.push_back(Vector2{ 10, 0 });
+
+
+
+	
+	
+	Model model{ points, Color{1,0,0,} };
+
+	Transform transform{ {renderer.GetWidth() >>1 ,renderer.GetHeight() >>1 },0,5};
+
+
+	
+
 		//main loop
 		bool quit = false;
 	while (!quit)
@@ -44,6 +106,20 @@ int main(int argc, char* argv[])
 		cout << time.GetTime() << endl;
 		//Input
 		input.Update();
+		float thrust = 0;
+		if (input.GetKeyDown(SDL_SCANCODE_LEFT)) transform.rotation -= Math::DegToRad(100) * time.GetDeltaTime();
+		if (input.GetKeyDown(SDL_SCANCODE_RIGHT)) transform.rotation += Math::DegToRad(100) * time.GetDeltaTime();
+
+		if (input.GetKeyDown(SDL_SCANCODE_DOWN)) thrust = -100;
+		if (input.GetKeyDown(SDL_SCANCODE_UP)) thrust = 100;
+
+		Vector2 velocity = Vector2{ thrust, 0.0f }.Rotate(transform.rotation);
+		transform.position +=  velocity * time.GetDeltaTime();
+		transform.position.x = Math::Wrap(transform.position.x, (float)renderer.GetWidth());
+		transform.position.y = Math::Wrap(transform.position.y, (float)renderer.GetHeight());
+
+		//transform.rotation = velocity.Angle(); //rotation + time.GetDeltaTime();
+		
 
 		if (input.GetKeyDown(SDL_SCANCODE_ESCAPE))
 		{
@@ -56,7 +132,11 @@ int main(int argc, char* argv[])
 		{
 	
 			//particles.push_back(Particle{ mousePosition,{randomf(-300,300),randomf(-300,300)} });
-			particles.push_back(Particle{ mousePosition,{randomf(-300,300),randomf(-300,300)},randomf(1,5) });
+			for (int i = 0; i < 20; i++)
+			{
+				particles.push_back(Particle{ mousePosition,randomOnUnitCircle() * randomf(10,200) ,randomf(1,5) });
+			}
+			
 
 			
 		}
@@ -68,8 +148,32 @@ int main(int argc, char* argv[])
 			if (particle.position.x > 800) particle.position.x = 0;
 			if (particle.position.x < 0) particle.position.x = 800;
 
-			if (particle.lifespan != 0) particle.lifespan -= time.GetDeltaTime();
+			
 		}
+
+
+
+
+		if (input.GetKeyDown(SDL_SCANCODE_Q) && !input.GetPreviousKeyDown(SDL_SCANCODE_Q))
+		{
+			 audio->playSound(sounds[0], 0, false, nullptr);
+		}
+		if (input.GetKeyDown(SDL_SCANCODE_W) && !input.GetPreviousKeyDown(SDL_SCANCODE_W))
+		{
+			audio->playSound(sounds[1], 0, false, nullptr);
+		}
+		if (input.GetKeyDown(SDL_SCANCODE_E) && !input.GetPreviousKeyDown(SDL_SCANCODE_E))
+		{
+			audio->playSound(sounds[2], 0, false, nullptr);
+		}
+	
+	
+	
+		
+	
+
+
+
 		//cout << mousePosition.x << " " << mousePosition.y << endl;
 		/*if (input.GetMouseButtonDown(0)&& !input.GetPreviousMouseButtonDown(0))
 		{
@@ -98,6 +202,22 @@ int main(int argc, char* argv[])
 		renderer.SetColor(0, 0, 0, 0);
 		renderer.BeginFrame();
 
+		renderer.SetColor(rand() % 256, rand() % 256, rand() % 256, rand() % 256);
+		float radius = 60;
+		offset += (90 * time.GetDeltaTime());
+		for (float angle = 0; angle < 360; angle += 360 / 30)
+		{
+			float x = Math::Cos(Math::DegToRad(angle + offset)) * Math::Sin((offset + angle) * 0.01f) * radius;
+			float y = Math::Sin(Math::DegToRad(angle + offset)) * Math::Sin((offset + angle) * 0.01f) * radius;
+
+			//renderer.DrawRect(400 + x, 300 +  y, 4.0f, 4.0f);
+
+		}
+
+
+		audio->update();
+
+
 		// draw line
 		renderer.SetColor(rand() % 256, rand() % 256, rand() % 256, rand() % 256);
 		for (Particle particle : particles)
@@ -118,8 +238,8 @@ int main(int argc, char* argv[])
 			renderer.DrawLine( rand() % 1000, rand() % 1000, rand() % 1000, rand() % 1000);
 		}
 		*/
-		
-
+		renderer.SetColor(255, 255, 255 , 0);
+		model.Draw(renderer,transform);
 		// show screen
 		renderer.EndFrame();
 	}
