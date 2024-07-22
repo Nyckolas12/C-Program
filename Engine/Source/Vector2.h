@@ -17,6 +17,7 @@ struct Vector2
 	float LengthSqr() const { return(x * x) + (y * y); }
 	float Length() const { return Math::Sqrt((x * x) + (y * y)); }
 	float Angle() { return Math::Atan2(y, x); }
+	Vector2 Normalized() const { return *this / Length(); }
 
 	Vector2 Rotate(float radians) const;
 
