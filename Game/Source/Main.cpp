@@ -27,10 +27,15 @@ int main(int argc, char* argv[])
 		g_engine.GetRenderer().SetColor(0, 0, 0, 0);
 		g_engine.GetRenderer().BeginFrame();
 
+		
+		
 		game->Draw(g_engine.GetRenderer());
+
 
 		g_engine.GetRenderer().EndFrame();
 	}
+
+	g_engine.Shutdown();
 	return 0;
 	/*
 	

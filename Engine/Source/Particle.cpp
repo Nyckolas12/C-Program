@@ -1,5 +1,14 @@
 #include "Particle.h"
 
+void Particle::Initialize(const Data& data)
+{
+	isActive = true;
+
+	position = data.position;
+	velocity = data.velocity;
+	lifespan = data.lifespan;
+}
+
 void Particle::Update(float dt)
 {
 	if (lifespan != 0) lifespan -= dt;

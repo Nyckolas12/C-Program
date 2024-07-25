@@ -7,11 +7,11 @@
 
 void Player::OnCollision(Actor* actor)
 {
-	if (actor->GetTag() == "Enemy") 
+	if (actor->GetTag() == "Enemy" || actor -> GetTag() == "Alien")
 	{
-	std::cout << "collision\n";
+	
 
-	dynamic_cast<SpaceGame*>( m_scene->GetGame());
+	dynamic_cast<SpaceGame*>( m_scene->GetGame())->OnPlayerDeath();
 
 	m_destroyed = true;
 
@@ -22,7 +22,7 @@ void Player::Update(float dt)
 {	//movement
 	float thrust = 0;
 	Vector2 direction{ 0,0 };
-	if (g_engine.GetInput().GetKeyDown(SDL_SCANCODE_LEFT))  m_transform.rotation -= Math::DegToRad(100) * dt;
+	if (g_engine.GetInput().GetKeyDown(SDL_SCANCODE_A))  m_transform.rotation -= Math::DegToRad(100) * dt;
 	if (g_engine.GetInput().GetKeyDown(SDL_SCANCODE_D)) m_transform.rotation += Math::DegToRad(100) * dt;
 
 	if (g_engine.GetInput().GetKeyDown(SDL_SCANCODE_S)) direction.x = -1;
@@ -54,10 +54,10 @@ void Player::Update(float dt)
 		Model* model = new Model{ points, Color{ 1, 1, 0 } };
 		Transform transform{ m_transform.position,m_transform.rotation,1.0f };
 		
-		Bullet* bullet = new Bullet(600, transform, model);
+		auto bullet = std::make_unique<Bullet>(600, transform, model);
 		bullet->SetLifeSpan(1);
 		bullet->SetTag("PlayerBullet");
-		m_scene->AddActor(bullet);
+		m_scene->AddActor(std::move(bullet));
 	}
 
 	Actor::Update(dt);

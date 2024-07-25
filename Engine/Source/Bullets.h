@@ -12,8 +12,13 @@ public:
 		Actor{ transform , model },
 		m_speed{ speed }
 	{}
+	
 	virtual void OnCollision(Actor* actor);
 	void Update(float dt);
+	//Vector2 GetVelocity() const { return m_velocity; }
 private:
 	float m_speed = 0;
+	
+	
+	
 };

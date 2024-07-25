@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="Source\Enemy.cpp" />
     <ClCompile Include="Source\GameDatat.cpp" />
+    <ClCompile Include="Source\goalPost.cpp" />
     <ClCompile Include="Source\Main.cpp" />
     <ClCompile Include="Source\PickUp.cpp" />
     <ClCompile Include="Source\Player.cpp" />
@@ -34,6 +35,7 @@
   <ItemGroup>
     <ClInclude Include="Source\Enemy.h" />
     <ClInclude Include="Source\GameData.h" />
+    <ClInclude Include="Source\goalPost.h" />
     <ClInclude Include="Source\PickUp.h" />
     <ClInclude Include="Source\Player.h" />
     <ClInclude Include="Source\SpaceGame.h" />

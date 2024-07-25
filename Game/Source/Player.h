@@ -15,6 +15,9 @@ public:
 	virtual void OnCollision(Actor* actor);
 	void Update(float dt);
 
+	void SetSpeed(float speed) { m_speed = speed; }
+	float GetSpeed() const { return m_speed; }
+
 	void SetFireModifier(float modifier) { m_fireModifier = modifier; }
 private:
 	float m_speed = 0;
